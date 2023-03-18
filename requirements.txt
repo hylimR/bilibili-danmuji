@@ -1,0 +1,30 @@
+Cython
+librosa==0.9.1
+numpy
+scipy
+tensorboard
+torch --extra-index-url https://download.pytorch.org/whl/cu116
+torchvision --extra-index-url https://download.pytorch.org/whl/cu116
+torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
+jamo
+pypinyin
+jieba
+protobuf
+cn2an
+inflect
+eng_to_ipa
+ko_pron
+indic_transliteration==2.3.37
+num_thai==0.0.5
+opencc==1.1.1
+demucs
+openai-whisper
+gradio
+unidecode
+pyopenjtalk
+pydub
+soundfile
+simpleaudio
+openpyxl
+PyQt5
+aiowebsocket

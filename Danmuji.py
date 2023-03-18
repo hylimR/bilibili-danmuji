@@ -1,23 +1,24 @@
 
 from getWebsocket import *
 from MainWindow import *
-from ConfigWindow import *
 from DisplayWindow import *
 from AboutInfo import *
 from TUOPAN import *
+from voice_generator import VoiceGenerator
 
 
 class BiliDanmuji():
     def __init__(self):
         # 主要对象
         self.app = QApplication(sys.argv)
-        self.app.setQuitOnLastWindowClosed(False)  # 最小化托盘用,关闭所有窗口也不结束程序
+        self.app.setQuitOnLastWindowClosed(True)  # 最小化托盘用,关闭所有窗口也不结束程序
         self.scan() # 扫描文件夹，若不存在报错
         self.w = MainWindow()   # 主窗口
-        self.settingWindow = ConfigWindow() # 设置窗口
-        self.display = DisplayWindow()  # 弹幕展示窗口
-        self.about = AboutInfo()  # 关于窗口
-        self.tuopan = TUOPAN()  # 托盘对象
+        self.voice_generator = VoiceGenerator()
+        # self.settingWindow = ConfigWindow() # 设置窗口
+        # self.display = DisplayWindow()  # 弹幕展示窗口
+        # self.about = AboutInfo()  # 关于窗口
+        # self.tuopan = TUOPAN()  # 托盘对象
         # 爬虫对象
         self.bilisocket = BiliSocket()
         # 开始运行、弹幕窗口隐藏标志
@@ -25,8 +26,9 @@ class BiliDanmuji():
         self.isHide = True
         # 接受子窗口传回来的信号  然后调用主界面的函数
         global_ms.my_Signal.connect(self.SignalHandle)
+        global_ms.new_comment.connect(self.readComments)
         # 写日志
-        logger.info('----------------------初始化成功-----------------------')
+
 
     def run(self):
         try:
@@ -34,7 +36,7 @@ class BiliDanmuji():
             self.w.show()
             sys.exit(self.app.exec_())
         except:
-            logger.critical('**********************程序异常退出************************')
+            self.voice_generator.log("程序异常退出")
 
     def scan(self):
         if not os.path.exists('ui') or not os.path.exists('config'):
@@ -50,7 +52,7 @@ class BiliDanmuji():
 
     def close_com(self):
         if self.startFlag == True:
-            self.display.hide()
+            #self.display.hide()
             self.isHide = True
             try:
                 logger.info('///尝试关闭循环')
@@ -60,9 +62,10 @@ class BiliDanmuji():
                 logger.info(f'loop状态：{self.loop.is_running()}，{self.loop.is_closed()} / '
                             f'SocketTread状态：{self.SocketTread.is_alive()}')
                 logger.info('///循环关闭成功')
+                self.w.startButton.show()
+                self.w.closeButton.hide()
             except NotImplementedError as e:
                 logger.error(u'///关闭循环出错：{}'.format(e))
-
 
     def start_run(self):
         try:
@@ -75,9 +78,9 @@ class BiliDanmuji():
                     print(self.SocketTread.is_alive())
                     if self.SocketTread.is_alive():
                         self.close_com()
-                    self.display.clearWindow()
+                    #self.display.clearWindow()
                     self.bilisocket.comList.clear()
-                self.display.show()
+                # self.display.show()
                 self.isHide = False
                 loop = asyncio.new_event_loop()
                 self.SocketTread = threading.Thread(target=self.asyncTreadfun, args=(loop, text),
@@ -85,6 +88,9 @@ class BiliDanmuji():
                 self.SocketTread.daemon = True  # 守护线程
                 self.SocketTread.start()
                 logger.info(f'开启/更新成功，当前房间：{text}')
+                self.voice_generator.log("弹幕链接成功")
+                self.w.startButton.hide()
+                self.w.closeButton.show()
             else:
                 self.startFlag = False
                 logger.info('输入房间号有误')
@@ -95,7 +101,6 @@ class BiliDanmuji():
             self.isHide = True
             logger.error(u'开启/更新出错：{}'.format(e))
 
-
     def asyncTreadfun(self,new_loop,roomid):
         try:
             asyncio.set_event_loop(new_loop)
@@ -104,6 +109,13 @@ class BiliDanmuji():
             self.loop.run_until_complete(asyncio.wait([task]))
         except RuntimeError as e:
             logger.warning(u'loop循环未完成退出（若是关闭时为正常现象）。错误信息：{}'.format(e))
+
+    def readComments(self,bool, user, msg):
+        self.voice_generator.tts_play(user, msg)
+
+    def log(self, user, msg):
+        self.voice_generator.log(msg)
+        self.w.logger.append("{} : {}", user, msg)
 
     def SignalHandle(self,value):
         if value == 'closeWin':
@@ -125,7 +137,6 @@ class BiliDanmuji():
         elif value == 'exit':
             self.quitApp()
 
-
     def quitApp(self):
         print('托盘关闭')
         if self.isHide == False:
@@ -135,7 +146,6 @@ class BiliDanmuji():
         self.tuopan.tp.setVisible(False)
         logger.info('----------------------程序正常退出-----------------------')
         sys.exit(0)
-
 
 if __name__ == '__main__':
     danmuji = BiliDanmuji()

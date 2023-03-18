@@ -14,7 +14,5 @@ class MainWindow(QMainWindow):
         self.Ui_init()
 
     def Ui_init(self):
-        self.openSettingWinButton.triggered.connect(lambda: global_ms.my_Signal.emit('setting'))
-        self.openAboutWinButton.triggered.connect(lambda: global_ms.my_Signal.emit('about'))
         self.startButton.clicked.connect(lambda: global_ms.my_Signal.emit('start'))
         self.closeButton.clicked.connect(lambda: global_ms.my_Signal.emit('close'))

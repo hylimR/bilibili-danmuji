@@ -9,3 +9,8 @@
 *.ico
 
 config/BiliComment.xlsx
+wav_temp
+
+G_latest.pth
+finetune_speaker.json
+moegoe_config.json

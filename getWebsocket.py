@@ -140,7 +140,6 @@ class BiliSocket():
         try:
             fromUser = data[2][1]
             text = data[1]
-            msg = fromUser + ': ' + text
             self.allowFlag = False
             if blackUser != []:
                 if fromUser in blackUser:
@@ -165,7 +164,7 @@ class BiliSocket():
                             self.allowFlag = True
 
             if self.allowFlag == True:
-                global_ms.new_comment.emit(True,msg)
+                global_ms.new_comment.emit(True, fromUser, text)
                 self.allowFlag = False
         except Exception as e:
             global_ms.my_Signal.emit('WebSocketError')

@@ -94,7 +94,7 @@ class MySignals(QObject):
     text_print = QtCore.pyqtSignal(int, str)
     # 还可以定义其他种类的信号
     my_Signal = QtCore.pyqtSignal(str)
-    new_comment = QtCore.pyqtSignal(bool,str)
+    new_comment = QtCore.pyqtSignal(bool,str, str)
     otherChange = QtCore.pyqtSignal(str,str)
     sizeChange = QtCore.pyqtSignal(str,int)
     fontChange = QtCore.pyqtSignal(QFont)
